@@ -7,6 +7,7 @@ const connection = require("./node-mongoDB/db.cjs");
 const userRoutes = require("./routes/user");
 const authRoutes = require("./routes/auth");
 const recipeApi = require("./recipeApi");
+const shoppingListRoutes = require("./routes/shoppingList");
 
 // Enable CORS for all routes
 app.use(cors());
@@ -22,11 +23,13 @@ app.get("/api/recipes/search", async (req, res) => {
     const results = await recipeApi.getCompleteRecipeDetails(searchTerm, page);
     return res.json(results);
   } catch (error) {
-    console.log("Error in /api/recipes/search:", error);
-    res.status(500).json({ error: "Failed to fetch recipe details." });
+    console.error("Error in /api/recipes/search:", error.message);
+    res.status(500).json({ error: error.message || "Internal server error." });
   }
 });
-
+app.use("/api/users", userRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/shoppingList", shoppingListRoutes);
 // Root route (optional)
 app.get("/", (req, res) => res.send("Hello World"));
 
