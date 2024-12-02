@@ -11,7 +11,8 @@ const shoppingListRoutes = require("./routes/shoppingList");
 const Recipe = require("./models/Recipe");
 const { UserModel: User } = require("./models/User");  // Import the User model
 const mongoose = require('mongoose');
-
+const noteRoutes = require('./routes/notes');
+const Note = require('./models/Notes');
 // Enable CORS for all routes
 app.use(cors({
   origin: 'http://localhost:3000', // Your frontend URL
@@ -107,6 +108,79 @@ app.get("/api/recipes", async (req, res) => {
     });
   }
 });
+// Example Express route handler for fetching all notes for a user
+// Example Express route handler for fetching all notes for a user
+app.get('/api/notes/:userId', async (req, res) => {
+  const { userId } = req.params;  // Extract userId from route parameters
+
+  // Validate that the userId is a valid ObjectId
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: 'Invalid User ID.' });
+  }
+
+  try {
+    // Fetch notes for the specific userId
+    const notes = await Note.find({ userId: new mongoose.Types.ObjectId(userId) });  // Correct model name 'Note'
+
+    if (!notes || notes.length === 0) {
+      return res.status(404).json({ message: 'No notes found for this user.' });
+    }
+
+    res.status(200).json(notes);  // Return the notes
+  } catch (error) {
+    console.error('Error fetching notes:', error);
+    res.status(500).json({ message: 'Internal server error while fetching notes.', error: error.message });
+  }
+});
+
+
+
+// Route to create a new note
+// Route to create a new note for a recipe
+app.post('/api/notes/create', async (req, res) => {
+  const { title, content, recipeId, userId } = req.body;  // Extract userId, recipeId, title, and content from the request body
+
+  if (!userId || !recipeId) {
+    return res.status(400).json({ message: "User ID and Recipe ID are required" });
+  }
+
+  try {
+    // Ensure userId is a valid ObjectId
+    const validUserId = new mongoose.Types.ObjectId(userId);  // Correct way to instantiate ObjectId
+
+    // Create a new note
+    const newNote = new Note({
+      userId: validUserId,  // Store the userId
+      recipeId: recipeId,   // Store the recipeId (could be a string or ObjectId)
+      title: title,
+      content: content,
+    });
+
+    // Save the note to the database
+    await newNote.save();
+    res.status(201).json(newNote);  // Respond with the created note
+  } catch (error) {
+    console.error('Error creating note:', error);
+    res.status(500).json({ message: 'Error creating note.', error: error.message });
+  }
+});
+
+
+
+
+// Example Express route handler for deleting a note
+app.delete('/api/notes/:noteId', async (req, res) => {
+  try {
+    const note = await Note.findByIdAndDelete(req.params.noteId);
+    if (!note) {
+      return res.status(404).json({ message: 'Note not found' });
+    }
+    res.status(200).json({ message: 'Note deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting note' });
+  }
+});
+
 app.delete("/api/recipes/:recipeId", async (req, res) => {
   const { userId } = req.query;
   const { recipeId } = req.params;
@@ -127,6 +201,7 @@ app.delete("/api/recipes/:recipeId", async (req, res) => {
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/shoppingList", shoppingListRoutes);
+app.use('/api/notes', noteRoutes);
 
 // Root route (optional)
 app.get("/", (req, res) => res.send("Hello World"));
