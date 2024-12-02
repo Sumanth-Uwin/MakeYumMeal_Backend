@@ -20,15 +20,17 @@ router.post("/", async (req, res) => {
     if (!validPassword)
       return res.status(401).send({ message: "Invalid Email or Password" });
 
-    // Generate the JWT token
+    // Generate the JWT token (placeholder for now)
     const token = 1234;
 
-    // Send back the token along with user info (optional fields)
+    // Send back the token along with user info (including firstname and lastname)
     res.status(200).send({
       data: {
         token,
         userId: user._id,
-        email: user.email, // You can include other user details as needed
+        email: user.email, // User's email
+        firstName: user.firstname, // User's first name
+        lastName: user.lastname,   // User's last name
       },
       message: "Logged in successfully",
     });
