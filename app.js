@@ -208,5 +208,5 @@ app.use('/api/notes', noteRoutes);
 app.get("/", (req, res) => res.send("Hello World"));
 
 // Start the server
-const port = config.PORT
+const port = config.PORT || 3100
 app.listen(port, () => console.log(`Server running on port ${port}`));
