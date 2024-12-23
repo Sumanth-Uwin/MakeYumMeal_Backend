@@ -13,6 +13,7 @@ const { UserModel: User } = require("./models/User");  // Import the User model
 const mongoose = require('mongoose');
 const noteRoutes = require('./routes/notes');
 const Note = require('./models/Notes');
+const config =require('./config')
 // Enable CORS for all routes
 app.use(cors({
   origin: 'http://localhost:3000', // Your frontend URL
@@ -207,5 +208,5 @@ app.use('/api/notes', noteRoutes);
 app.get("/", (req, res) => res.send("Hello World"));
 
 // Start the server
-const port = process.env.PORT || 3100;
+const port = config.PORT
 app.listen(port, () => console.log(`Server running on port ${port}`));
