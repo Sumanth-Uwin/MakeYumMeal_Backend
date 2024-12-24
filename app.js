@@ -15,9 +15,19 @@ const noteRoutes = require('./routes/notes');
 const Note = require('./models/Notes');
 const config =require('./config')
 // Enable CORS for all routes
+const allowedOrigins = [
+  'http://localhost:3000', // Local development frontend
+  'https://make-yum-meal.netlify.app' // Deployed frontend
+];
 app.use(cors({
-  origin: 'http://localhost:3000', // Your frontend URL
-  credentials: true
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
 }));
 app.use(express.json());
 connection();
